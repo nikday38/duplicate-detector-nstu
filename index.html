@@ -3,118 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Сиамская сеть - Детектор дубликатов</title>
+    <title>CopyrightControl - Детектор дубликатов изображений</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🔍 CopyrightControl </h1>
+            <div class="logo">
+                <h1>🛡️ CopyrightControl</h1>
+                <p class="tagline">AI-система для защиты и анализа изображений</p>
+            </div>
+            <nav class="main-nav">
+                <a href="#demo" class="nav-link active">Демо</a>
+                <a href="#technology" class="nav-link">Технологии</a>
+                <a href="#api" class="nav-link">API</a>
+                <a href="#contact" class="nav-link">Контакты</a>
+            </nav>
         </header>
 
-        <div class="demo-section">
-            <h2>Демонстрация работы системы</h2>
-            
-            <div class="upload-container">
-                <div class="upload-box">
-                    <div class="upload-area" id="dropZone1">
-                        <span>📁 Перетащите или выберите</span>
-                        <span>Изображение 1</span>
-                        <input type="file" id="fileInput1" accept="image/*" hidden>
-                        <button type="button" onclick="document.getElementById('fileInput1').click()">Выбрать файл</button>
-                    </div>
-                    <div class="image-preview" id="preview1"></div>
-                </div>
-
-                <div class="upload-box">
-                    <div class="upload-area" id="dropZone2">
-                        <span>📁 Перетащите или выберите</span>
-                        <span>Изображение 2</span>
-                        <input type="file" id="fileInput2" accept="image/*" hidden>
-                        <button type="button" onclick="document.getElementById('fileInput2').click()">Выбрать файл</button>
-                    </div>
-                    <div class="image-preview" id="preview2"></div>
-                </div>
-            </div>
-
-            <button id="analyzeBtn" onclick="analyzeImages()" disabled>🔍 Проанализировать изображения</button>
-            
-            <div id="result" class="result-section" style="display: none;">
-                <h3>Результат анализа</h3>
-                <div class="result-content">
-                    <div class="similarity-score">
-                        <div class="score-circle">
-                            <span id="similarityValue">0%</span>
+        <main>
+            <section id="demo" class="demo-section">
+                <h2>🔍 Детектор дубликатов изображений</h2>
+                <p class="section-description">
+                    Проверьте схожесть изображений с помощью передовых AI-алгоритмов. 
+                    Система анализирует визуальное содержание и определяет степень соответствия.
+                </p>
+                
+                <div class="upload-container">
+                    <div class="upload-box">
+                        <div class="upload-area" id="dropZone1">
+                            <div class="upload-icon">📁</div>
+                            <span class="upload-title">Исходное изображение</span>
+                            <span class="upload-subtitle">Перетащите или выберите файл</span>
+                            <input type="file" id="fileInput1" accept="image/*" hidden>
+                            <button type="button" class="upload-btn" onclick="document.getElementById('fileInput1').click()">
+                                Выбрать файл
+                            </button>
                         </div>
-                        <p>Схожесть изображений</p>
+                        <div class="image-preview" id="preview1">
+                            <div class="preview-placeholder">
+                                <span>Изображение не выбрано</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="verdict">
-                        <h4 id="verdictText">Ожидание анализа...</h4>
-                        <p id="verdictDescription"></p>
+
+                    <div class="upload-box">
+                        <div class="upload-area" id="dropZone2">
+                            <div class="upload-icon">📁</div>
+                            <span class="upload-title">Сравниваемое изображение</span>
+                            <span class="upload-subtitle">Перетащите или выберите файл</span>
+                            <input type="file" id="fileInput2" accept="image/*" hidden>
+                            <button type="button" class="upload-btn" onclick="document.getElementById('fileInput2').click()">
+                                Выбрать файл
+                            </button>
+                        </div>
+                        <div class="image-preview" id="preview2">
+                            <div class="preview-placeholder">
+                                <span>Изображение не выбрано</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analyze-controls">
+                    <button id="analyzeBtn" class="analyze-button" onclick="analyzeImages()" disabled>
+                        <span class="btn-icon">🔍</span>
+                        Запустить анализ
+                    </button>
+                    <div class="file-info">
+                        <span id="fileInfo">Поддерживаемые форматы: JPG, PNG, WebP (до 5MB)</span>
                     </div>
                 </div>
                 
-                <div class="technical-details">
-                    <h4>Технические детали:</h4>
-                    <div class="details-grid">
-                        <div class="detail-item">
-                            <span class="label">Метод сравнения:</span>
-                            <span class="value">Векторные эмбеддинги</span>
+                <div id="result" class="result-section" style="display: none;">
+                    <h3>Результаты анализа</h3>
+                    <div class="result-content">
+                        <div class="similarity-score">
+                            <div class="score-circle">
+                                <span id="similarityValue">0%</span>
+                            </div>
+                            <p class="score-label">Схожесть контента</p>
                         </div>
-                        <div class="detail-item">
-                            <span class="label">Размерность признаков:</span>
-                            <span class="value">128 измерений</span>
+                        <div class="verdict">
+                            <h4 id="verdictText">Анализ не выполнен</h4>
+                            <p id="verdictDescription" class="verdict-description">
+                                Загрузите два изображения для сравнения
+                            </p>
+                            <div class="confidence-meter">
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" id="confidenceFill"></div>
+                                </div>
+                                <span class="confidence-label">Уверенность системы: <span id="confidenceValue">0%</span></span>
+                            </div>
                         </div>
-                        <div class="detail-item">
-                            <span class="label">Порог дубликата:</span>
-                            <span class="value">75%</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Точность системы:</span>
-                            <span class="value">96.3%</span>
+                    </div>
+                    
+                    <div class="technical-details">
+                        <h4>Детали анализа:</h4>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="label">Метод сравнения:</span>
+                                <span class="value">Векторные эмбеддинги</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Размерность признаков:</span>
+                                <span class="value">512 измерений</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Порог дубликата:</span>
+                                <span class="value">85%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Время обработки:</span>
+                                <span class="value" id="processingTime">~2.3 сек</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <div class="theory-section">
-            <h2>📚 Теоретическая основа</h2>
-            
-            <div class="architecture">
-                <h3>Архитектура сиамской сети</h3>
-                <div class="arch-diagram">
-                    <div class="arch-row">
-                        <div class="arch-node">Входное изображение 1</div>
-                        <div class="arch-arrow">→</div>
-                        <div class="arch-node">CNN (ResNet)</div>
-                        <div class="arch-arrow">→</div>
-                        <div class="arch-node">Вектор признаков</div>
+            <section id="technology" class="technology-section">
+                <h2>🚀 Технологии</h2>
+                <div class="tech-grid">
+                    <div class="tech-card">
+                        <div class="tech-icon">🧠</div>
+                        <h3>Сиамские сети</h3>
+                        <p>Глубокое обучение для сравнения изображений с общей весовой матрицей</p>
                     </div>
-                    <div class="arch-row">
-                        <div class="arch-node">Входное изображение 2</div>
-                        <div class="arch-arrow">→</div>
-                        <div class="arch-node">CNN (ResNet)</div>
-                        <div class="arch-arrow">→</div>
-                        <div class="arch-node">Вектор признаков</div>
+                    <div class="tech-card">
+                        <div class="tech-icon">🔍</div>
+                        <h3>CNN Features</h3>
+                        <p>Сверточные нейросети для извлечения визуальных признаков</p>
                     </div>
-                    <div class="arch-join">↓</div>
-                    <div class="arch-row center">
-                        <div class="arch-node">Расстояние L2</div>
-                        <div class="arch-arrow">→</div>
-                        <div class="arch-node">Contrastive Loss</div>
-                        <div class="arch-arrow">→</div>
-                        <div class="arch-node">Вердикт</div>
+                    <div class="tech-card">
+                        <div class="tech-icon">📊</div>
+                        <h3>Vector Search</h3>
+                        <p>Быстрый поиск по векторным представлениям в многомерном пространстве</p>
+                    </div>
+                    <div class="tech-card">
+                        <div class="tech-icon">🛡️</div>
+                        <h3>Content Protection</h3>
+                        <p>Обнаружение копий и модифицированных версий изображений</p>
                     </div>
                 </div>
-            </div>
 
-            <div class="comparison">
-                <h3>Сравнение с традиционными методами</h3>
-                <canvas id="metricsChart" width="400" height="200"></canvas>
+                <div class="architecture">
+                    <h3>Архитектура системы</h3>
+                    <div class="arch-diagram">
+                        <div class="arch-row">
+                            <div class="arch-node">Input Image A</div>
+                            <div class="arch-arrow">→</div>
+                            <div class="arch-node">Feature Extraction</div>
+                            <div class="arch-arrow">→</div>
+                            <div class="arch-node">Vector Embedding</div>
+                        </div>
+                        <div class="arch-row">
+                            <div class="arch-node">Input Image B</div>
+                            <div class="arch-arrow">→</div>
+                            <div class="arch-node">Feature Extraction</div>
+                            <div class="arch-arrow">→</div>
+                            <div class="arch-node">Vector Embedding</div>
+                        </div>
+                        <div class="arch-join">↓</div>
+                        <div class="arch-row center">
+                            <div class="arch-node">Distance Calculation</div>
+                            <div class="arch-arrow">→</div>
+                            <div class="arch-node">Similarity Score</div>
+                            <div class="arch-arrow">→</div>
+                            <div class="arch-node">Result Analysis</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="api" class="api-section">
+                <h2>🔧 API Документация</h2>
+                <div class="api-docs">
+                    <div class="endpoint">
+                        <h4>POST /api/compare</h4>
+                        <p>Сравнение двух изображений</p>
+                        <div class="code-block">
+                            <pre><code>{
+  "image1": "base64_encoded_image",
+  "image2": "base64_encoded_image"
+}
+
+Response:
+{
+  "similarity": 0.92,
+  "is_duplicate": true,
+  "confidence": 0.96,
+  "processing_time": 2.1
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="metrics" class="metrics-section">
+                <h2>📊 Производительность системы</h2>
+                <div class="charts-container">
+                    <div class="chart-wrapper">
+                        <canvas id="accuracyChart" width="400" height="300"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="speedChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer id="contact">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CopyrightControl</h3>
+                    <p>AI-система для защиты контента и анализа изображений</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <p>Email: contact@copyrightcontrol.ai</p>
+                    <p>Телефон: +7 (XXX) XXX-XXXX</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Технологии</h4>
+                    <p>Сиамские нейросети</p>
+                    <p>Компьютерное зрение</p>
+                    <p>Векторный поиск</p>
+                </div>
             </div>
-        </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CopyrightControl. Все права защищены.</p>
+            </div>
+        </footer>
     </div>
 
     <script src="script.js"></script>
