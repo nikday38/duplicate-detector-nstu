@@ -157,6 +157,7 @@ const CopyrightControl = {
             this.displayResults(similarity, confidence, processingTime);
             
         } catch (error) {
+            console.error('Analysis error:', error);
             this.displayError('Ошибка при анализе изображений');
         } finally {
             analyzeBtn.disabled = false;
@@ -201,29 +202,69 @@ const CopyrightControl = {
     },
     
     displayResults(similarity, confidence, processingTime) {
-        const similarityPercent = (similarity * 100).toFixed(1);
-        const confidencePercent = (confidence * 100).toFixed(1);
-        
         const resultSection = document.getElementById('result');
-        resultSection.style.display = 'block';
-        resultSection.scrollIntoView({ behavior: 'smooth' });
         
-        // Update similarity score with animation
+        // ВОССТАНАВЛИВАЕМ ПРАВИЛЬНУЮ СТРУКТУРУ HTML
+        resultSection.innerHTML = `
+            <h3>Результаты анализа</h3>
+            <div class="result-content">
+                <div class="similarity-score">
+                    <div class="score-circle">
+                        <span id="similarityValue">0%</span>
+                    </div>
+                    <p class="score-label">Схожесть контента</p>
+                </div>
+                <div class="verdict">
+                    <h4 id="verdictText">Анализ не выполнен</h4>
+                    <p id="verdictDescription" class="verdict-description">
+                        Загрузите два изображения для сравнения
+                    </p>
+                    <div class="confidence-meter">
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidenceFill"></div>
+                        </div>
+                        <span class="confidence-label">Уверенность системы: <span id="confidenceValue">0%</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="technical-details">
+                <h4>Детали анализа:</h4>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="label">Метод сравнения:</span>
+                        <span class="value">Векторные эмбеддинги</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Размерность признаков:</span>
+                        <span class="value">512 измерений</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Порог дубликата:</span>
+                        <span class="value">85%</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Время обработки:</span>
+                        <span class="value" id="processingTime">~${processingTime} сек</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Теперь обновляем анимации
         this.animateSimilarityScore(similarity);
-        
-        // Update confidence meter
         this.animateConfidenceMeter(confidence);
-        
-        // Update verdict
         this.updateVerdict(similarity, confidence);
-        
-        // Update processing time
-        document.getElementById('processingTime').textContent = `~${processingTime} сек`;
     },
     
     animateSimilarityScore(targetSimilarity) {
         const similarityValue = document.getElementById('similarityValue');
         const scoreCircle = document.querySelector('.score-circle');
+        
+        if (!similarityValue || !scoreCircle) {
+            console.error('Elements not found for similarity animation');
+            return;
+        }
         
         let current = 0;
         const duration = 2000;
@@ -253,6 +294,11 @@ const CopyrightControl = {
         const confidenceFill = document.getElementById('confidenceFill');
         const confidenceValue = document.getElementById('confidenceValue');
         
+        if (!confidenceFill || !confidenceValue) {
+            console.error('Elements not found for confidence animation');
+            return;
+        }
+        
         let current = 0;
         const duration = 1500;
         const increment = targetConfidence / (duration / 16);
@@ -277,6 +323,11 @@ const CopyrightControl = {
         const verdictText = document.getElementById('verdictText');
         const verdictDescription = document.getElementById('verdictDescription');
         
+        if (!verdictText || !verdictDescription) {
+            console.error('Verdict elements not found');
+            return;
+        }
+        
         const isDuplicate = similarity > 0.85;
         const isSimilar = similarity > 0.6;
         
@@ -297,108 +348,119 @@ const CopyrightControl = {
     
     displayError(message) {
         const resultSection = document.getElementById('result');
-        resultSection.innerHTML = `
-            <div style="text-align: center; padding: 2rem; color: var(--error);">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
-                <h3>Ошибка</h3>
-                <p>${message}</p>
-            </div>
-        `;
+        if (resultSection) {
+            resultSection.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: var(--error);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
+                    <h3>Ошибка</h3>
+                    <p>${message}</p>
+                    <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--error); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Попробовать снова
+                    </button>
+                </div>
+            `;
+        }
     },
     
     initCharts() {
         // Accuracy Comparison Chart
-        const accuracyCtx = document.getElementById('accuracyChart').getContext('2d');
-        new Chart(accuracyCtx, {
-            type: 'bar',
-            data: {
-                labels: ['CopyrightControl', 'Perceptual Hash', 'Histogram Compare', 'Traditional Hash'],
-                datasets: [{
-                    label: 'Точность (%)',
-                    data: [96.3, 84.1, 76.2, 45.8],
-                    backgroundColor: [
-                        'rgba(37, 99, 235, 0.8)',
-                        'rgba(124, 58, 237, 0.8)',
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(239, 68, 68, 0.8)'
-                    ],
-                    borderColor: [
-                        'rgb(37, 99, 235)',
-                        'rgb(124, 58, 237)',
-                        'rgb(245, 158, 11)',
-                        'rgb(239, 68, 68)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
+        const accuracyCanvas = document.getElementById('accuracyChart');
+        if (accuracyCanvas) {
+            const accuracyCtx = accuracyCanvas.getContext('2d');
+            new Chart(accuracyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['CopyrightControl', 'Perceptual Hash', 'Histogram Compare', 'Traditional Hash'],
+                    datasets: [{
+                        label: 'Точность (%)',
+                        data: [96.3, 84.1, 76.2, 45.8],
+                        backgroundColor: [
+                            'rgba(37, 99, 235, 0.8)',
+                            'rgba(124, 58, 237, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(37, 99, 235)',
+                            'rgb(124, 58, 237)',
+                            'rgb(245, 158, 11)',
+                            'rgb(239, 68, 68)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Точность (%)'
+                            }
+                        }
+                    },
+                    plugins: {
                         title: {
                             display: true,
-                            text: 'Точность (%)'
+                            text: 'Сравнение точности методов детектирования'
+                        },
+                        legend: {
+                            display: false
                         }
                     }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Сравнение точности методов детектирования'
-                    },
-                    legend: {
-                        display: false
-                    }
                 }
-            }
-        });
+            });
+        }
 
         // Processing Speed Chart
-        const speedCtx = document.getElementById('speedChart').getContext('2d');
-        new Chart(speedCtx, {
-            type: 'bar',
-            data: {
-                labels: ['CopyrightControl', 'Perceptual Hash', 'Histogram Compare'],
-                datasets: [{
-                    label: 'Время обработки (мс)',
-                    data: [2300, 150, 80],
-                    backgroundColor: [
-                        'rgba(37, 99, 235, 0.8)',
-                        'rgba(124, 58, 237, 0.8)',
-                        'rgba(245, 158, 11, 0.8)'
-                    ],
-                    borderColor: [
-                        'rgb(37, 99, 235)',
-                        'rgb(124, 58, 237)',
-                        'rgb(245, 158, 11)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
+        const speedCanvas = document.getElementById('speedChart');
+        if (speedCanvas) {
+            const speedCtx = speedCanvas.getContext('2d');
+            new Chart(speedCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['CopyrightControl', 'Perceptual Hash', 'Histogram Compare'],
+                    datasets: [{
+                        label: 'Время обработки (мс)',
+                        data: [2300, 150, 80],
+                        backgroundColor: [
+                            'rgba(37, 99, 235, 0.8)',
+                            'rgba(124, 58, 237, 0.8)',
+                            'rgba(245, 158, 11, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(37, 99, 235)',
+                            'rgb(124, 58, 237)',
+                            'rgb(245, 158, 11)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Время обработки (мс)'
+                            }
+                        }
+                    },
+                    plugins: {
                         title: {
                             display: true,
-                            text: 'Время обработки (мс)'
+                            text: 'Сравнение скорости обработки'
+                        },
+                        legend: {
+                            display: false
                         }
                     }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Сравнение скорости обработки'
-                    },
-                    legend: {
-                        display: false
-                    }
                 }
-            }
-        });
+            });
+        }
     }
 };
 
@@ -410,4 +472,22 @@ function analyzeImages() {
 // Initialize application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     CopyrightControl.init();
+});
+
+// Error handling for uncaught errors
+window.addEventListener('error', (event) => {
+    console.error('Global error:', event.error);
+    const resultSection = document.getElementById('result');
+    if (resultSection) {
+        resultSection.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: var(--error);">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                <h3>Произошла ошибка</h3>
+                <p>Пожалуйста, обновите страницу и попробуйте снова</p>
+                <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Обновить страницу
+                </button>
+            </div>
+        `;
+    }
 });
