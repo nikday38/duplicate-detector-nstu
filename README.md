@@ -4,7 +4,7 @@
 
 ## 🚀 Демо
 
-Сайт размещен на GitHub Pages: [https://nikday39.github.io/CopyrightControl](https://nikday38.github.io/CopyrightControl)
+Сайт размещен на GitHub Pages: [https://nikday38.github.io/CopyrightControl](https://nikday38.github.io/CopyrightControl)
 
 ## 📋 Описание
 
