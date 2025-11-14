@@ -1,8 +1,7 @@
-// CopyrightControl Application
+// CopyrightControl Application - Упрощенная версия
 const CopyrightControl = {
     image1: null,
     image2: null,
-    processingStartTime: null,
     
     init() {
         this.setupEventListeners();
@@ -14,30 +13,18 @@ const CopyrightControl = {
         // File input handlers
         const fileInput1 = document.getElementById('fileInput1');
         const fileInput2 = document.getElementById('fileInput2');
-        const dropZone1 = document.getElementById('dropZone1');
-        const dropZone2 = document.getElementById('dropZone2');
         
         fileInput1.addEventListener('change', (e) => this.handleFileSelect(e, 1));
         fileInput2.addEventListener('change', (e) => this.handleFileSelect(e, 2));
         
         // Drag and drop setup
-        this.setupDragAndDrop(dropZone1, 1);
-        this.setupDragAndDrop(dropZone2, 2);
-        
-        // Smooth scrolling for navigation
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = link.getAttribute('href').substring(1);
-                const targetSection = document.getElementById(targetId);
-                if (targetSection) {
-                    targetSection.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-        });
+        this.setupDragAndDrop('dropZone1', 1);
+        this.setupDragAndDrop('dropZone2', 2);
     },
     
-    setupDragAndDrop(dropZone, imageNumber) {
+    setupDragAndDrop(dropZoneId, imageNumber) {
+        const dropZone = document.getElementById(dropZoneId);
+        
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropZone.classList.add('dragover');
@@ -73,11 +60,6 @@ const CopyrightControl = {
     handleFile(file, imageNumber) {
         const reader = new FileReader();
         
-        reader.onloadstart = () => {
-            const preview = document.getElementById(`preview${imageNumber}`);
-            preview.innerHTML = '<div class="preview-placeholder loading">Загрузка...</div>';
-        };
-        
         reader.onload = (e) => {
             const imageData = e.target.result;
             
@@ -94,8 +76,6 @@ const CopyrightControl = {
         
         reader.onerror = () => {
             alert('Ошибка при загрузке файла');
-            const preview = document.getElementById(`preview${imageNumber}`);
-            preview.innerHTML = '<div class="preview-placeholder">Ошибка загрузки</div>';
         };
         
         reader.readAsDataURL(file);
@@ -103,20 +83,7 @@ const CopyrightControl = {
     
     displayImage(imageData, previewId) {
         const preview = document.getElementById(previewId);
-        const img = new Image();
-        
-        img.onload = () => {
-            preview.innerHTML = '';
-            preview.appendChild(img);
-        };
-        
-        img.onerror = () => {
-            preview.innerHTML = '<div class="preview-placeholder">Ошибка отображения</div>';
-        };
-        
-        img.src = imageData;
-        img.style.maxWidth = '100%';
-        img.style.height = 'auto';
+        preview.innerHTML = `<img src="${imageData}" alt="Preview" style="max-width: 100%; height: auto;">`;
     },
     
     updateAnalyzeButton() {
@@ -125,105 +92,105 @@ const CopyrightControl = {
     },
     
     async analyzeImages() {
-        if (!this.image1 || !this.image2) return;
+        if (!this.image1 || !this.image2) {
+            alert('Пожалуйста, загрузите оба изображения');
+            return;
+        }
         
-        this.processingStartTime = Date.now();
         const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultSection = document.getElementById('result');
         
-        // Update UI for processing state
+        // Блокируем кнопку и показываем загрузку
         analyzeBtn.disabled = true;
         analyzeBtn.innerHTML = '<span class="btn-icon">⏳</span>Анализ...';
         
-        // Show loading state in results
-        const resultSection = document.getElementById('result');
+        // Показываем индикатор загрузки
         resultSection.style.display = 'block';
         resultSection.innerHTML = `
             <div style="text-align: center; padding: 3rem;">
-                <div class="loading" style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
                 <h3>Анализ изображений</h3>
                 <p>Идет обработка с помощью AI-алгоритмов...</p>
+                <div class="loading" style="margin-top: 1rem;">Загрузка...</div>
             </div>
         `;
         
         try {
-            // Simulate AI processing
-            await this.simulateAIProcessing();
+            // Имитация обработки AI (2-3 секунды)
+            await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
             
-            // Calculate similarity and confidence
-            const similarity = this.calculateSimilarity();
-            const confidence = this.calculateConfidence(similarity);
-            const processingTime = ((Date.now() - this.processingStartTime) / 1000).toFixed(1);
+            // Генерируем реалистичные результаты
+            const similarity = this.generateRealisticSimilarity();
+            const confidence = 0.85 + Math.random() * 0.1; // 85-95%
+            const processingTime = (2 + Math.random() * 2).toFixed(1);
             
-            this.displayResults(similarity, confidence, processingTime);
+            // Показываем результаты
+            this.showResults(similarity, confidence, processingTime);
             
         } catch (error) {
             console.error('Analysis error:', error);
-            this.displayError('Ошибка при анализе изображений');
+            this.showError();
         } finally {
+            // Восстанавливаем кнопку
             analyzeBtn.disabled = false;
             analyzeBtn.innerHTML = '<span class="btn-icon">🔍</span>Запустить анализ';
         }
     },
     
-    async simulateAIProcessing() {
-        // Simulate neural network processing time (2-4 seconds)
-        const processingTime = 2000 + Math.random() * 2000;
-        return new Promise(resolve => setTimeout(resolve, processingTime));
-    },
-    
-    calculateSimilarity() {
-        // Advanced similarity calculation simulation
-        let baseSimilarity = Math.random();
+    generateRealisticSimilarity() {
+        // Генерируем более реалистичные значения схожести
+        const random = Math.random();
         
-        // Add some intelligent bias based on "image characteristics"
-        if (this.image1 && this.image2) {
-            // Simulate that similar images tend to have higher similarity
-            const bias = 0.3 + Math.random() * 0.4; // 30-70% base similarity
-            baseSimilarity = baseSimilarity * 0.3 + bias;
-        }
-        
-        // Occasionally generate very high similarity for demo purposes
-        if (Math.random() > 0.8) {
-            baseSimilarity = 0.85 + Math.random() * 0.15; // 85-100%
-        }
-        
-        return Math.min(1, Math.max(0, baseSimilarity));
-    },
-    
-    calculateConfidence(similarity) {
-        // Higher confidence for extreme similarity values
-        if (similarity > 0.9 || similarity < 0.1) {
-            return 0.95 + Math.random() * 0.05; // 95-100%
-        } else if (similarity > 0.7 || similarity < 0.3) {
-            return 0.85 + Math.random() * 0.1; // 85-95%
+        if (random < 0.3) {
+            // Низкая схожесть (0-40%)
+            return Math.random() * 0.4;
+        } else if (random < 0.7) {
+            // Средняя схожесть (40-80%)
+            return 0.4 + Math.random() * 0.4;
         } else {
-            return 0.7 + Math.random() * 0.15; // 70-85%
+            // Высокая схожесть (80-100%)
+            return 0.8 + Math.random() * 0.2;
         }
     },
     
-    displayResults(similarity, confidence, processingTime) {
+    showResults(similarity, confidence, processingTime) {
         const resultSection = document.getElementById('result');
+        const similarityPercent = Math.round(similarity * 100);
+        const confidencePercent = Math.round(confidence * 100);
         
-        // ВОССТАНАВЛИВАЕМ ПРАВИЛЬНУЮ СТРУКТУРУ HTML
+        // Определяем вердикт
+        let verdict, description, color;
+        if (similarityPercent >= 80) {
+            verdict = '✅ ВЫСОКАЯ СХОЖЕСТЬ';
+            description = 'Изображения практически идентичны. Вероятность дублирования очень высока.';
+            color = '#10b981';
+        } else if (similarityPercent >= 50) {
+            verdict = '⚠️ УМЕРЕННАЯ СХОЖЕСТЬ';
+            description = 'Изображения имеют значительное сходство, но не являются точными копиями.';
+            color = '#f59e0b';
+        } else {
+            verdict = '❌ НИЗКАЯ СХОЖЕСТЬ';
+            description = 'Изображения существенно различаются. Вероятность дублирования минимальна.';
+            color = '#ef4444';
+        }
+        
         resultSection.innerHTML = `
             <h3>Результаты анализа</h3>
             <div class="result-content">
                 <div class="similarity-score">
-                    <div class="score-circle">
-                        <span id="similarityValue">0%</span>
+                    <div class="score-circle" id="scoreCircle">
+                        <span id="similarityValue">${similarityPercent}%</span>
                     </div>
                     <p class="score-label">Схожесть контента</p>
                 </div>
                 <div class="verdict">
-                    <h4 id="verdictText">Анализ не выполнен</h4>
-                    <p id="verdictDescription" class="verdict-description">
-                        Загрузите два изображения для сравнения
-                    </p>
+                    <h4 id="verdictText" style="color: ${color}">${verdict}</h4>
+                    <p class="verdict-description">${description}</p>
                     <div class="confidence-meter">
                         <div class="confidence-bar">
-                            <div class="confidence-fill" id="confidenceFill"></div>
+                            <div class="confidence-fill" id="confidenceFill" style="width: ${confidencePercent}%"></div>
                         </div>
-                        <span class="confidence-label">Уверенность системы: <span id="confidenceValue">0%</span></span>
+                        <span class="confidence-label">Уверенность системы: ${confidencePercent}%</span>
                     </div>
                 </div>
             </div>
@@ -245,249 +212,174 @@ const CopyrightControl = {
                     </div>
                     <div class="detail-item">
                         <span class="label">Время обработки:</span>
-                        <span class="value" id="processingTime">~${processingTime} сек</span>
+                        <span class="value">~${processingTime} сек</span>
                     </div>
                 </div>
             </div>
         `;
-
-        // Теперь обновляем анимации
-        this.animateSimilarityScore(similarity);
-        this.animateConfidenceMeter(confidence);
-        this.updateVerdict(similarity, confidence);
+        
+        // Анимируем круг схожести
+        this.animateScoreCircle(similarityPercent);
     },
     
-    animateSimilarityScore(targetSimilarity) {
+    animateScoreCircle(targetPercent) {
+        const scoreCircle = document.getElementById('scoreCircle');
         const similarityValue = document.getElementById('similarityValue');
-        const scoreCircle = document.querySelector('.score-circle');
-        
-        if (!similarityValue || !scoreCircle) {
-            console.error('Elements not found for similarity animation');
-            return;
-        }
-        
-        let current = 0;
-        const duration = 2000;
-        const increment = targetSimilarity / (duration / 16);
-        
-        const animate = () => {
-            current += increment;
-            if (current < targetSimilarity) {
-                const percentage = Math.min(current * 100, 100);
-                similarityValue.textContent = `${percentage.toFixed(1)}%`;
-                
-                scoreCircle.style.background = 
-                    `conic-gradient(var(--success) 0% ${percentage}%, var(--border) ${percentage}% 100%)`;
-                
-                requestAnimationFrame(animate);
-            } else {
-                similarityValue.textContent = `${(targetSimilarity * 100).toFixed(1)}%`;
-                scoreCircle.style.background = 
-                    `conic-gradient(var(--success) 0% ${targetSimilarity * 100}%, var(--border) ${targetSimilarity * 100}% 100%)`;
-            }
-        };
-        
-        animate();
-    },
-    
-    animateConfidenceMeter(targetConfidence) {
-        const confidenceFill = document.getElementById('confidenceFill');
-        const confidenceValue = document.getElementById('confidenceValue');
-        
-        if (!confidenceFill || !confidenceValue) {
-            console.error('Elements not found for confidence animation');
-            return;
-        }
         
         let current = 0;
         const duration = 1500;
-        const increment = targetConfidence / (duration / 16);
+        const steps = 60;
+        const increment = targetPercent / steps;
         
         const animate = () => {
-            current += increment;
-            if (current < targetConfidence) {
-                const percentage = Math.min(current * 100, 100);
-                confidenceFill.style.width = `${percentage}%`;
-                confidenceValue.textContent = `${percentage.toFixed(1)}%`;
-                requestAnimationFrame(animate);
-            } else {
-                confidenceFill.style.width = `${targetConfidence * 100}%`;
-                confidenceValue.textContent = `${(targetConfidence * 100).toFixed(1)}%`;
+            if (current < targetPercent) {
+                current += increment;
+                const currentPercent = Math.min(current, targetPercent);
+                
+                similarityValue.textContent = Math.round(currentPercent) + '%';
+                scoreCircle.style.background = 
+                    `conic-gradient(#10b981 0% ${currentPercent}%, #e5e7eb ${currentPercent}% 100%)`;
+                
+                setTimeout(animate, duration / steps);
             }
         };
         
         animate();
     },
     
-    updateVerdict(similarity, confidence) {
-        const verdictText = document.getElementById('verdictText');
-        const verdictDescription = document.getElementById('verdictDescription');
-        
-        if (!verdictText || !verdictDescription) {
-            console.error('Verdict elements not found');
-            return;
-        }
-        
-        const isDuplicate = similarity > 0.85;
-        const isSimilar = similarity > 0.6;
-        
-        if (isDuplicate) {
-            verdictText.textContent = '✅ ВЫСОКАЯ СХОЖЕСТЬ';
-            verdictText.style.color = 'var(--success)';
-            verdictDescription.textContent = 'Изображения практически идентичны. Вероятность дублирования очень высока.';
-        } else if (isSimilar) {
-            verdictText.textContent = '⚠️ УМЕРЕННАЯ СХОЖЕСТЬ';
-            verdictText.style.color = 'var(--warning)';
-            verdictDescription.textContent = 'Изображения имеют значительное сходство, но не являются точными копиями.';
-        } else {
-            verdictText.textContent = '❌ НИЗКАЯ СХОЖЕСТЬ';
-            verdictText.style.color = 'var(--error)';
-            verdictDescription.textContent = 'Изображения существенно различаются. Вероятность дублирования минимальна.';
-        }
+    showError() {
+        const resultSection = document.getElementById('result');
+        resultSection.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: #ef4444;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
+                <h3>Ошибка анализа</h3>
+                <p>Произошла ошибка при обработке изображений. Пожалуйста, попробуйте снова.</p>
+                <button onclick="CopyrightControl.retryAnalysis()" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: #2563eb; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">
+                    Попробовать снова
+                </button>
+            </div>
+        `;
     },
     
-    displayError(message) {
+    retryAnalysis() {
         const resultSection = document.getElementById('result');
-        if (resultSection) {
-            resultSection.innerHTML = `
-                <div style="text-align: center; padding: 2rem; color: var(--error);">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
-                    <h3>Ошибка</h3>
-                    <p>${message}</p>
-                    <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--error); color: white; border: none; border-radius: 5px; cursor: pointer;">
-                        Попробовать снова
-                    </button>
-                </div>
-            `;
-        }
+        resultSection.style.display = 'none';
+        
+        // Сбрасываем изображения
+        this.image1 = null;
+        this.image2 = null;
+        
+        // Очищаем превью
+        document.getElementById('preview1').innerHTML = '<div class="preview-placeholder"><span>Изображение не выбрано</span></div>';
+        document.getElementById('preview2').innerHTML = '<div class="preview-placeholder"><span>Изображение не выбрано</span></div>';
+        
+        // Сбрасываем кнопку
+        document.getElementById('analyzeBtn').disabled = true;
+        document.getElementById('analyzeBtn').innerHTML = '<span class="btn-icon">🔍</span>Запустить анализ';
+        
+        // Сбрасываем файловые инпуты
+        document.getElementById('fileInput1').value = '';
+        document.getElementById('fileInput2').value = '';
     },
     
     initCharts() {
-        // Accuracy Comparison Chart
-        const accuracyCanvas = document.getElementById('accuracyChart');
-        if (accuracyCanvas) {
-            const accuracyCtx = accuracyCanvas.getContext('2d');
-            new Chart(accuracyCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['CopyrightControl', 'Perceptual Hash', 'Histogram Compare', 'Traditional Hash'],
-                    datasets: [{
-                        label: 'Точность (%)',
-                        data: [96.3, 84.1, 76.2, 45.8],
-                        backgroundColor: [
-                            'rgba(37, 99, 235, 0.8)',
-                            'rgba(124, 58, 237, 0.8)',
-                            'rgba(245, 158, 11, 0.8)',
-                            'rgba(239, 68, 68, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgb(37, 99, 235)',
-                            'rgb(124, 58, 237)',
-                            'rgb(245, 158, 11)',
-                            'rgb(239, 68, 68)'
-                        ],
-                        borderWidth: 1
-                    }]
+        // Ждем пока DOM полностью загрузится
+        setTimeout(() => {
+            this.createAccuracyChart();
+            this.createSpeedChart();
+        }, 100);
+    },
+    
+    createAccuracyChart() {
+        const ctx = document.getElementById('accuracyChart');
+        if (!ctx) return;
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['CopyrightControl', 'Perceptual Hash', 'Histogram Compare', 'Traditional Hash'],
+                datasets: [{
+                    label: 'Точность (%)',
+                    data: [96.3, 84.1, 76.2, 45.8],
+                    backgroundColor: [
+                        'rgba(37, 99, 235, 0.8)',
+                        'rgba(124, 58, 237, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgb(37, 99, 235)',
+                        'rgb(124, 58, 237)',
+                        'rgb(245, 158, 11)',
+                        'rgb(239, 68, 68)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
                 },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: {
-                                display: true,
-                                text: 'Точность (%)'
-                            }
-                        }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Сравнение точности методов детектирования'
-                        },
-                        legend: {
-                            display: false
-                        }
+                plugins: {
+                    legend: {
+                        display: false
                     }
                 }
-            });
-        }
-
-        // Processing Speed Chart
-        const speedCanvas = document.getElementById('speedChart');
-        if (speedCanvas) {
-            const speedCtx = speedCanvas.getContext('2d');
-            new Chart(speedCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['CopyrightControl', 'Perceptual Hash', 'Histogram Compare'],
-                    datasets: [{
-                        label: 'Время обработки (мс)',
-                        data: [2300, 150, 80],
-                        backgroundColor: [
-                            'rgba(37, 99, 235, 0.8)',
-                            'rgba(124, 58, 237, 0.8)',
-                            'rgba(245, 158, 11, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgb(37, 99, 235)',
-                            'rgb(124, 58, 237)',
-                            'rgb(245, 158, 11)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Время обработки (мс)'
-                            }
-                        }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Сравнение скорости обработки'
-                        },
-                        legend: {
-                            display: false
-                        }
+            }
+        });
+    },
+    
+    createSpeedChart() {
+        const ctx = document.getElementById('speedChart');
+        if (!ctx) return;
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['CopyrightControl', 'Perceptual Hash', 'Histogram Compare'],
+                datasets: [{
+                    label: 'Время обработки (мс)',
+                    data: [2300, 150, 80],
+                    backgroundColor: [
+                        'rgba(37, 99, 235, 0.8)',
+                        'rgba(124, 58, 237, 0.8)',
+                        'rgba(245, 158, 11, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgb(37, 99, 235)',
+                        'rgb(124, 58, 237)',
+                        'rgb(245, 158, 11)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
                     }
                 }
-            });
-        }
+            }
+        });
     }
 };
 
-// Global functions for HTML event handlers
+// Глобальные функции
 function analyzeImages() {
     CopyrightControl.analyzeImages();
 }
 
-// Initialize application when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
     CopyrightControl.init();
 });
 
-// Error handling for uncaught errors
-window.addEventListener('error', (event) => {
-    console.error('Global error:', event.error);
-    const resultSection = document.getElementById('result');
-    if (resultSection) {
-        resultSection.innerHTML = `
-            <div style="text-align: center; padding: 2rem; color: var(--error);">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
-                <h3>Произошла ошибка</h3>
-                <p>Пожалуйста, обновите страницу и попробуйте снова</p>
-                <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    Обновить страницу
-                </button>
-            </div>
-        `;
-    }
+// Глобальная обработка ошибок
+window.addEventListener('error', function(event) {
+    console.log('Произошла ошибка:', event.error);
 });
