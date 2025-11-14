@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сиамская сеть - Детектор дубликатов</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Сиамские нейронные сети для детектирования дубликатов изображений</h1>
+            <p class="subtitle">Дипломный проект для конференции НГТУ НТИ-2025</p>
+        </header>
+
+        <div class="demo-section">
+            <h2>Демонстрация работы системы</h2>
+            
+            <div class="upload-container">
+                <div class="upload-box">
+                    <div class="upload-area" id="dropZone1">
+                        <span>📁 Перетащите или выберите</span>
+                        <span>Изображение 1</span>
+                        <input type="file" id="fileInput1" accept="image/*" hidden>
+                        <button type="button" onclick="document.getElementById('fileInput1').click()">Выбрать файл</button>
+                    </div>
+                    <div class="image-preview" id="preview1"></div>
+                </div>
+
+                <div class="upload-box">
+                    <div class="upload-area" id="dropZone2">
+                        <span>📁 Перетащите или выберите</span>
+                        <span>Изображение 2</span>
+                        <input type="file" id="fileInput2" accept="image/*" hidden>
+                        <button type="button" onclick="document.getElementById('fileInput2').click()">Выбрать файл</button>
+                    </div>
+                    <div class="image-preview" id="preview2"></div>
+                </div>
+            </div>
+
+            <button id="analyzeBtn" onclick="analyzeImages()" disabled>🔍 Проанализировать изображения</button>
+            
+            <div id="result" class="result-section" style="display: none;">
+                <h3>Результат анализа</h3>
+                <div class="result-content">
+                    <div class="similarity-score">
+                        <div class="score-circle">
+                            <span id="similarityValue">0%</span>
+                        </div>
+                        <p>Схожесть изображений</p>
+                    </div>
+                    <div class="verdict">
+                        <h4 id="verdictText">Ожидание анализа...</h4>
+                        <p id="verdictDescription"></p>
+                    </div>
+                </div>
+                
+                <div class="technical-details">
+                    <h4>Технические детали:</h4>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="label">Метод сравнения:</span>
+                            <span class="value">Векторные эмбеддинги</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Размерность признаков:</span>
+                            <span class="value">128 измерений</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Порог дубликата:</span>
+                            <span class="value">75%</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Точность системы:</span>
+                            <span class="value">96.3%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2>📚 Теоретическая основа</h2>
+            
+            <div class="architecture">
+                <h3>Архитектура сиамской сети</h3>
+                <div class="arch-diagram">
+                    <div class="arch-row">
+                        <div class="arch-node">Входное изображение 1</div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-node">CNN (ResNet)</div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-node">Вектор признаков</div>
+                    </div>
+                    <div class="arch-row">
+                        <div class="arch-node">Входное изображение 2</div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-node">CNN (ResNet)</div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-node">Вектор признаков</div>
+                    </div>
+                    <div class="arch-join">↓</div>
+                    <div class="arch-row center">
+                        <div class="arch-node">Расстояние L2</div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-node">Contrastive Loss</div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-node">Вердикт</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comparison">
+                <h3>Сравнение с традиционными методами</h3>
+                <canvas id="metricsChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <footer>
+            <p>Дипломная работа для XIX Всероссийской научной конференции "Наука. Технологии. Инновации"</p>
+            <p>НГТУ НЭТИ, 2025</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
